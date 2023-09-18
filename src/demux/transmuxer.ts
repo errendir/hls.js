@@ -33,9 +33,9 @@ type MuxConfig =
   | { demux: typeof MP3Demuxer; remux: typeof MP4Remuxer };
 
 const muxConfig: MuxConfig[] = [
-  { demux: MP4Demuxer, remux: PassThroughRemuxer },
-  { demux: TSDemuxer, remux: MP4Remuxer },
-  { demux: AACDemuxer, remux: MP4Remuxer },
+  // { demux: MP4Demuxer, remux: PassThroughRemuxer },
+  // { demux: TSDemuxer, remux: MP4Remuxer },
+  // { demux: AACDemuxer, remux: MP4Remuxer },
   { demux: MP3Demuxer, remux: MP4Remuxer },
 ];
 
@@ -416,7 +416,7 @@ export default class Transmuxer {
   private configureTransmuxer(data: Uint8Array): void | Error {
     const { config, observer, typeSupported, vendor } = this;
     // probe for content type
-    let mux;
+    let mux: MuxConfig | null = null;
     for (let i = 0, len = muxConfig.length; i < len; i++) {
       if (muxConfig[i].demux.probe(data)) {
         mux = muxConfig[i];
@@ -429,8 +429,8 @@ export default class Transmuxer {
     // so let's check that current remuxer and demuxer are still valid
     const demuxer = this.demuxer;
     const remuxer = this.remuxer;
-    const Remuxer: MuxConfig['remux'] = mux.remux;
-    const Demuxer: MuxConfig['demux'] = mux.demux;
+    const Remuxer = mux.remux;
+    const Demuxer = mux.demux;
     if (!remuxer || !(remuxer instanceof Remuxer)) {
       this.remuxer = new Remuxer(observer, config, typeSupported, vendor);
     }
